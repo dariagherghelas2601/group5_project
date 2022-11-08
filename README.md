@@ -1,7 +1,7 @@
 # AM10 Data Visualisation and Story Telling - Group 5 Project
 ## What makes a song a hit?
 
-###What is your topic?
+#What is your topic?
 Thousands of new songs are released every year but very few make it to the top records. We decided to embark on a journey to discvoer what are the different characteristics of hit songs to help artists maximize their chances of launching a successful song. 
 
 # What questions are you addressing?
