@@ -14,7 +14,7 @@ There are many different variables to consider when thinking about music:
 
 ## What data will you be using?
 
-We will start with the complete historical dataset of every Billboard Hot 100 chart since 1958 (https://github.com/HipsterVizNinja/random-data/tree/main/Music/hot-100). This dataset contains detailed information about how a song performed on the charts (how long it has been on the chart, how many times a song returned to the chart, peak and worst position on charts etc.). TO have a comprehensive view over a particular song adn add more context, we will augment this with data from Spotify.
+We will start with the complete historical dataset of every Billboard Hot 100 chart since 1958 (https://github.com/HipsterVizNinja/random-data/tree/main/Music/hot-100). This dataset contains detailed information about how a song performed on the charts (how long it has been on the chart, how many times a song returned to the chart, peak and worst position on charts etc.). In order to have a complete view over a particular song and add more context, we will augment this with data from Spotify.
 
 ## What statistical methods will you use?
 We will be using cluster analysis to group features and identify the correlation between variables such as genre and time on the chart. The  goal is to create a prediction model that is able to identify the likelyhood that a song will become a hit by looking at variables such as artist name, title, genre, length etc.
