@@ -1,5 +1,5 @@
 # AM10 Data Visualisation and Story Telling - Group 5 Project
-## What makes a song a hit?
+## Understanding what make a hit song
 
 
 ## What is your topic?
