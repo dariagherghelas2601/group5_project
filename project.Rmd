@@ -1,0 +1,90 @@
+---
+title: "Final project"
+author: "Your name goes here"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+---
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+```
+
+```{r}
+#read data
+billboard_data <- vroom("data/Hot 100.csv", show_col_types = FALSE)
+
+glimpse(billboard_data)
+```
+
+```{r}
+skim(billboard_data)
+```
+```{r}
+billboard_data <- billboard_data %>%
+  mutate(
+    chart_year = year(chart_date)
+  )
+```
+
+```{r}
+different_songs <- billboard_data %>%
+  distinct(performer, chart_year) %>%
+  group_by(chart_year) %>%
+  mutate(count = n()) %>%
+  distinct(chart_year, count) %>%
+  arrange(chart_year)
+
+glimpse(different_songs)
+
+ggplot(data = different_songs) +
+  geom_col() +
+  aes(x = chart_year, y = count) +
+  labs(x = 'Year',
+       y = "# different artists", 
+       title = "Number of different artists featured each year")
+  
+```
+
+
+```{r}
+different_songs <- billboard_data %>%
+  distinct(performer)
+  group_by(chart_year) %>%
+  count(song) %>%
+  distinct(chart_year, n)
+
+glimpse(different_songs)
+```
+
+
