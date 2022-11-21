@@ -38,18 +38,45 @@ library(skimr)
 library(janitor)
 library(vroom)
 library(tidyquant)
+library(spotifyr)
+library(lubridate)
+
 ```
 
 ```{r}
 #read data
-billboard_data <- vroom("data/Hot 100.csv", show_col_types = FALSE)
+spotify_data <- vroom("data/spotify_dataset.csv", show_col_types = FALSE) %>% 
+  clean_names()
 
-glimpse(billboard_data)
+glimpse(spotify_data)
 ```
 
 ```{r}
-skim(billboard_data)
+summary(spotify_data)
+
 ```
+
+
+```{r}
+sum(is.na(spotify_data$`Release Date`))
+```
+
+```{r}
+#clean data
+
+spotify_data_clean <- spotify_data %>%
+  dplyr::select(-index) %>%
+  dplyr::select(-artist_followers,-streams, -song_id, everything()) %>%#move some not-so-important variables to the end. 
+  mutate(
+    release_date = mdy(release_date)
+  ) %>%
+  filter(!is.na(release_date))
+
+glimpse(spotify_data_clean)
+```
+
+
+#dump
 ```{r}
 billboard_data <- billboard_data %>%
   mutate(
@@ -86,5 +113,3 @@ different_songs <- billboard_data %>%
 
 glimpse(different_songs)
 ```
-
-
