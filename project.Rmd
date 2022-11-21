@@ -44,8 +44,8 @@ library(lubridate)
 ```
 
 ```{r}
-#read data
-spotify_data <- vroom("data/spotify_dataset.csv", show_col_types = FALSE) %>% 
+#loading data and fixing column names using janitor
+spotify_data <- vroom("data/spotify.csv", show_col_types = FALSE) %>% 
   clean_names()
 
 glimpse(spotify_data)
@@ -53,26 +53,38 @@ glimpse(spotify_data)
 
 ```{r}
 summary(spotify_data)
-
 ```
 
 
 ```{r}
+#check NA values for the release date
 sum(is.na(spotify_data$`Release Date`))
 ```
 
 ```{r}
 #clean data
-
 spotify_data_clean <- spotify_data %>%
-  dplyr::select(-index) %>%
+  dplyr::select(-index) %>%  #remove index column
   dplyr::select(-artist_followers,-streams, -song_id, everything()) %>%#move some not-so-important variables to the end. 
   mutate(
-    release_date = mdy(release_date)
+    release_date = mdy(release_date)#convert release date from char to date format
   ) %>%
-  filter(!is.na(release_date))
+  filter(!is.na(release_date))#17 values had a different format than month-day-year. We remove these and the previous NA values.
 
 glimpse(spotify_data_clean)
+```
+
+```{r}
+library(spotifyr)
+id <- "5e8d4482013047a08a112938acdf2bb5"
+secret <- "ecf72954cdd54588b37fc9ad99be669b"
+Sys.setenv(SPOTIFY_CLIENT_ID = id)
+Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
+access_token <- get_spotify_access_token()
+
+
+beatles <- get_track_("3Wrjm47oTz2sjIgck11l5e")
+beatles
 ```
 
 
