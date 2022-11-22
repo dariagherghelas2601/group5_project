@@ -40,7 +40,8 @@ library(vroom)
 library(tidyquant)
 library(spotifyr)
 library(lubridate)
-
+library(scales)
+library(patchwork)
 ```
 
 ```{r}
@@ -67,61 +68,90 @@ spotify_data_clean <- spotify_data %>%
   dplyr::select(-index) %>%  #remove index column
   dplyr::select(-artist_followers,-streams, -song_id, everything()) %>%#move some not-so-important variables to the end. 
   mutate(
-    release_date = mdy(release_date)#convert release date from char to date format
+    release_date = mdy(release_date),#convert release date from char to date format
+    release_month = month(release_date, label=TRUE, abbr = TRUE),
+    release_day = day(release_date),
+    duration_min = duration_ms / 60000
   ) %>%
   filter(!is.na(release_date))#17 values had a different format than month-day-year. We remove these and the previous NA values.
 
 glimpse(spotify_data_clean)
 ```
-
 ```{r}
-library(spotifyr)
-id <- "5e8d4482013047a08a112938acdf2bb5"
-secret <- "ecf72954cdd54588b37fc9ad99be669b"
-Sys.setenv(SPOTIFY_CLIENT_ID = id)
-Sys.setenv(SPOTIFY_CLIENT_SECRET = secret)
-access_token <- get_spotify_access_token()
-
-
-beatles <- get_track_("3Wrjm47oTz2sjIgck11l5e")
-beatles
-```
-
-
-#dump
-```{r}
-billboard_data <- billboard_data %>%
-  mutate(
-    chart_year = year(chart_date)
-  )
+glimpse(monthly_distrib)
 ```
 
 ```{r}
-different_songs <- billboard_data %>%
-  distinct(performer, chart_year) %>%
-  group_by(chart_year) %>%
-  mutate(count = n()) %>%
-  distinct(chart_year, count) %>%
-  arrange(chart_year)
+# Looking at the distribution of songs per month
 
-glimpse(different_songs)
+monthly_distrib <- spotify_data_clean %>%
+  group_by(release_month) %>%
+  summarize(
+    count = n()
+  ) 
 
-ggplot(data = different_songs) +
-  geom_col() +
-  aes(x = chart_year, y = count) +
-  labs(x = 'Year',
-       y = "# different artists", 
-       title = "Number of different artists featured each year")
+monthly_distrib <- monthly_distrib %>%
+  mutate(top3 = rank(-count) %in% 1:3)
   
+ggplot(data = monthly_distrib) +
+  aes(x = release_month, 
+      y = count, 
+      fill= top3) +
+  geom_bar(stat = 'identity', width=0.8) + 
+  labs(
+    x = "Month of release",
+    y = "Number of songs",
+    title = "Most hits were released in March, May and June"
+  ) +
+  scale_fill_manual(values = c("TRUE" = "#1db954", "FALSE" = "light grey")) +
+  theme_bw() + 
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        legend.position="none")
+
+day_distrib <- spotify_data_clean %>%
+  group_by(release_day) %>%
+  summarize(
+    count = n()
+  ) 
+
+day_distrib <- day_distrib %>%
+  mutate(top3 = rank(-count) %in% 1:3)
+
+ggplot(data = day_distrib) + 
+  aes(x = release_day, y = count, fill = top3) +
+  geom_bar(stat = 'identity', width=0.8, aes(xmin=1)) + 
+  labs(
+    x = "Day of release",
+    y = "",
+    title = "Most hits were released on the 6th, 10th and 13th"
+  ) +
+  scale_fill_manual(values = c("TRUE" = "#1db954", "FALSE" = "light grey")) +
+  coord_cartesian(xlim =c(1, 31)) +
+  theme_bw() + 
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        legend.position="none")
+
 ```
-
-
 ```{r}
-different_songs <- billboard_data %>%
-  distinct(performer)
-  group_by(chart_year) %>%
-  count(song) %>%
-  distinct(chart_year, n)
+#Relation between song popularity and duration
 
-glimpse(different_songs)
+ggplot(data = spotify_data_clean) +
+  aes(x = duration_min, y = popularity) +
+  geom_point() +
+  geom_smooth(color="#1db954", se=FALSE) +
+  theme_bw() +
+  labs(
+    x = "Duration (in min)",
+    y = "Popularity",
+    title = "Most hits are between 2.5 to 3 minutes long"
+  )
+
+
 ```
+
