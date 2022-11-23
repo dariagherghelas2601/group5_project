@@ -44,16 +44,16 @@ library(scales)
 library(patchwork)
 ```
 
+
+Thousands of new songs are released every year but very few make it to the top records. We decided to embark on a journey to discover what are the different characteristics of hit songs to help artists maximize their chances of launching a successful song.
+
+We started with with all the songs that have been on the Top 200 Weekly (Global) charts of Spotify in 2020 & 2021 (https://www.kaggle.com/datasets/sashankpillai/spotify-top-200-charts-20202021). The dataset contains features such as danceability, liveness, energy, loudness, chord etc.
+
+
 ```{r}
 #loading data and fixing column names using janitor
 spotify_data <- vroom("data/spotify.csv", show_col_types = FALSE) %>% 
   clean_names()
-
-glimpse(spotify_data)
-```
-
-```{r}
-summary(spotify_data)
 ```
 
 
@@ -63,7 +63,7 @@ sum(is.na(spotify_data$`Release Date`))
 ```
 
 ```{r}
-#clean data
+#Clean data
 spotify_data_clean <- spotify_data %>%
   dplyr::select(-index) %>%  #remove index column
   dplyr::select(-artist_followers,-streams, -song_id, everything()) %>%#move some not-so-important variables to the end. 
@@ -74,16 +74,13 @@ spotify_data_clean <- spotify_data %>%
     duration_min = duration_ms / 60000
   ) %>%
   filter(!is.na(release_date))#17 values had a different format than month-day-year. We remove these and the previous NA values.
-
-glimpse(spotify_data_clean)
-```
-```{r}
-glimpse(monthly_distrib)
 ```
 
-```{r}
-# Looking at the distribution of songs per month
+Distribution of songs per date
 
+We want to understand what's the best time to release a song. We start by looking at what's the month in which most top songs were released. Between 2020-2021, most top songs were released in March, May and June. 
+
+```{r}
 monthly_distrib <- spotify_data_clean %>%
   group_by(release_month) %>%
   summarize(
@@ -110,7 +107,12 @@ ggplot(data = monthly_distrib) +
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black"),
         legend.position="none")
+```
+Next we look at the date of the month. We can also notice that most hits were released on the days of 6th, 10th and 13th.
 
+Looking at the two graphs, we can see that 13th of May is the day when most songs were published. Therefore, publishing a song around 13th of May can increase chances of becoming a hit song. However, we must do a more detailed analysis between concluding this.
+
+```{r}
 day_distrib <- spotify_data_clean %>%
   group_by(release_day) %>%
   summarize(
@@ -138,6 +140,11 @@ ggplot(data = day_distrib) +
         legend.position="none")
 
 ```
+
+How long should a song be?
+
+We want to explore how duration can impact the popularity of a song. Looking at the graph, we can see that popularity increases with duration and most songs are between 2.5 and 3 minutes long. This is not surprising. Very short songs fail to establish a connection between the artist and listener.
+
 ```{r}
 #Relation between song popularity and duration
 
@@ -151,7 +158,6 @@ ggplot(data = spotify_data_clean) +
     y = "Popularity",
     title = "Most hits are between 2.5 to 3 minutes long"
   )
-
 
 ```
 
