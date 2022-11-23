@@ -1,6 +1,6 @@
 ---
 title: "Final project"
-author: "Your name goes here"
+author: "Group 5"
 date: "`r Sys.Date()`"
 output:
   html_document:
@@ -57,6 +57,7 @@ spotify_data <- vroom("data/spotify.csv", show_col_types = FALSE) %>%
   clean_names()
 ```
 
+
 ```{r}
 #check NA values for the release date
 sum(is.na(spotify_data$`Release Date`))
@@ -75,45 +76,6 @@ spotify_data_clean <- spotify_data %>%
   ) %>%
   filter(!is.na(release_date))#17 values had a different format than month-day-year. We remove these and the previous NA values.
 ```
-
-We first want to look at the most popular genre. The graph shows that dance pop is the most popular genre among the songs.
-
-```{r}
-#finding the top 20 genre
-data1 <- spotify_data_clean %>% 
-  group_by(genre) %>% 
-  summarise(occurances = n()) %>% 
-  slice_max(order_by = occurances, n=20)
-
-ggplot(data1, aes(y=fct_reorder(genre,(occurances)), x=occurances)) + 
-  geom_col(stat = 'identity',
-           width=0.8,
-           fill = "#1db954")+
-  theme(legend.position = "none") +
-  labs(title = "Top 20 Genre based on Popularity",
-       y = "Genre", 
-       x="Popularity")+
-  theme_bw()
-```
-
-Next we look at the most popular artist which is Taylor Swift.
-
-```{r}
-#finding the top 20 artist
-data1 <- spotify_data_clean %>% 
-  group_by(artist) %>% 
-  summarise(occurances = n()) %>% 
-  slice_max(order_by = occurances, n=20)
-
-ggplot(data1, aes(y=fct_reorder(artist,(occurances)), x=occurances)) + geom_col(fill='#1db954', width=0.8)+
-  theme(legend.position = "none") +
-  labs(title = "Top 20 Artist based on Popularity",
-       y = "Artist", 
-       x="Popularity")+
-  theme_bw()  
-
-```
-
 
 Distribution of songs per date
 
@@ -200,20 +162,6 @@ ggplot(data = spotify_data_clean) +
 
 ```
 
-Next we want to see how chord influences the popularity of the song. Looking at the box plot below, we can see all chords have similar median values and little influence over song success.
-
-```{r}
-ggplot(spotify_data_clean, 
-       aes(x=chord, 
-           y=popularity, 
-           group=chord)) +
-  geom_boxplot()+ 
-  labs(title="There’s no chord preference for popular songs",
-       x='Chord',
-       y='Popularity of Track')
-
-```
-
 There is no significant correlation between highest song position in the charts/how long it stayed in the top200 chart and its characteristics like danceability, energy and so on, so it's unlikely that any of those are predictors of whether the song will be a hit, however, we can explore on how those metrics interact among themselves. 
 
 ```{r}
@@ -225,31 +173,53 @@ corrplot(res, method = "ellipse", type = "upper", color = "green", tl.col = 'bla
 
 The resulting graphs show that loud songs tend to be also the most energetic ones. Acoustic ones, on the other hand, tend to be quieter, less energetic and harder to dance to. Finally, there is positive correlation between how emotional is the song and its danceability, loudness  and energy - so the most intense songs might be clubs' biggest hits.
 
-
-We've seen the positive correlation between energy, valence and danceability so we decided to take a closer look at their distribution. We can see similar distributions for all variables.
 ```{r}
-ggplot(spotify_data_clean) +
-    geom_density(aes(energy, 
-                     fill ="Energy", 
-                     alpha = 0.1)) + 
-    geom_density(aes(valence, 
-                     fill ="Valence", 
-                     alpha = 0.1)) + 
-    geom_density(aes(danceability, 
-                     fill ="Danceability", 
-                     alpha = 0.1)) + 
-    scale_x_continuous(name = "Delta") +
-    scale_y_continuous(name = "Density") +
-    ggtitle("Density plot of Energy, Valence and Danceability") +
-    theme_bw()  +
-    theme(legend.title=element_blank()) +
-    scale_fill_brewer(palette="YIGn")
-```
-Conclusion
+#finding the top 20 genre
+data1 <- spotify %>% 
+  group_by(Genre) %>% 
+  summarise(occurances = n()) %>% 
+  slice_max(order_by = occurances, n=20)
 
-We can conclude that the following variables make a song successful:
-- Write a dance pop song
-- Be Taylor Swift
-- Release it on May 13th
-- Duration between 2.5 - 3 minute
-- Make it loud, energetic, suitable for dancing and positive
+ggplot(data1, aes(y=fct_reorder(Genre,(occurances)), x=occurances)) + geom_col(fill='#2EE254', width=0.8)+
+  theme(legend.position = "none") +
+  labs(title = "Top 20 Genre based on Popularity",
+       y = "Genre", 
+       x="Popularity")+
+  theme_bw()  
+```
+
+The graph shows that dance pop is the most popular genre among the songs
+
+```{r}
+#finding the top 20 artist
+data1 <- spotify %>% 
+  group_by(Artist) %>% 
+  summarise(occurances = n()) %>% 
+  slice_max(order_by = occurances, n=20)
+
+ggplot(data1, aes(y=fct_reorder(Artist,(occurances)), x=occurances)) + geom_col(fill='#2EE254', width=0.8)+
+  theme(legend.position = "none") +
+  labs(title = "Top 20 Artist based on Popularity",
+       y = "Artist", 
+       x="Popularity")+
+  theme_bw()  
+
+```
+
+Taylor Swift is the most popular artist 
+
+```{r}
+#finding the relation between valence and popularity of the track
+ggplot(spotify, aes(y=Valence,x=Popularity)) + geom_col(fill='#2EE254', width=0.8)+
+  theme(legend.position = "none") +
+  labs(title = "Most popular songs happen to be sad songs",
+       subtitle="Valence indicates the mood of the song",
+       y = "Happiness of the song", 
+       x="Popularity")+
+  theme_bw() 
+
+```
+
+From the above visualization, we can see that the most popular songs have very low valency. Low valency states that the songs have a sad vibe associated with it. So popular songs have a sad vibe associated to it and that explains why taylor swift is the most popular artist.
+
+
